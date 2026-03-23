@@ -35,6 +35,7 @@ ai-agent-interview-guide/
 ├── solutions/                         # 参考答案与深度解析
 ├── records/                           # 按月归档的题目记录
 ├── resources/                         # 学习资源
+├── interview-experiences/             # 公开面经与高频考点整理
 ├── docs/                              # 补充文档
 └── collect-questions/                 # Codex Skill：整理题目到仓库
 ```
@@ -53,6 +54,7 @@ ai-agent-interview-guide/
 | 08-工具使用 | Function Calling、MCP、工具编排、实时通信 | ⭐⭐⭐ |
 | 09-评估与安全 | Benchmark、对齐、安全防护、审计 | ⭐⭐⭐⭐ |
 | 10-真实案例 | 工业级 Agent 场景与落地挑战 | ⭐⭐⭐⭐⭐ |
+| 面经模块 | 公开面经链接、真实问法与复习重点整理 | ⭐⭐⭐ |
 
 ## 如何使用
 
@@ -60,6 +62,7 @@ ai-agent-interview-guide/
 2. 根据薄弱模块针对性练习题目。
 3. 结合 `solutions/` 练习面试回答。
 4. 通过 `records/` 查看每次新增题目的批次记录。
+5. 结合 `interview-experiences/` 了解真实面试问法和项目追问角度。
 
 ## 在 Codex 中使用 `collect-questions` Skill
 
