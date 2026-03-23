@@ -45,3 +45,5 @@
 
 12. **什么是多智能体系统？让多个 LLM Agent 协同工作相比单个 Agent 有什么优势，又会引入哪些新的复杂性？**
     What is a multi-agent system? Compared with a single Agent, what advantages does coordinating multiple LLM Agents bring, and what new complexities does it introduce?
+
+13. **多 Agent 协作时，如何设计 Agent 之间的通信和协调机制？**

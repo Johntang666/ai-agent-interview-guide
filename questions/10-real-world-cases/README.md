@@ -54,3 +54,5 @@
 
 15. **当一个 Agent 需要在真实或模拟环境中（如机器人、游戏）执行任务时，它与纯粹基于软件工具的 Agent 有什么本质区别？**
     When an Agent operates in a real or simulated environment, such as robotics or games, how is it fundamentally different from an Agent that only uses software tools?
+
+16. **在构建一个复杂的 Agent 时，你认为最主要的挑战是什么？**

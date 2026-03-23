@@ -1,6 +1,6 @@
 ---
 name: collect-questions
-description: Collect and organize AI Agent interview questions for this repository. Use when the user provides interview questions, asks to add or classify agent/RAG/tool-use/system-design questions into `questions/`, wants to update `records/` monthly logs, or wants detailed bilingual answers generated under `solutions/`. Also applies to requests like “收集题目”, “整理面试题”, “归类到题库”, “补充答案”, or “把这些问题加入仓库”.
+description: Collect and organize AI Agent interview questions for this repository. Use when the user provides interview questions, asks to add or classify agent/RAG/tool-use/system-design questions into `questions/`, wants to update `records/` monthly logs, or wants detailed Chinese answers generated under `solutions/`. Also applies to requests like “收集题目”, “整理面试题”, “归类到题库”, “补充答案”, or “把这些问题加入仓库”.
 ---
 
 # Collect Questions
@@ -62,11 +62,10 @@ description: Collect and organize AI Agent interview questions for this reposito
 4. 如果不存在：
    - 追加到最合适的小节。
    - 如果没有合适小节，新增 `### 补充题目 / Additional Questions`。
-   - 题目格式保持中英双语：
+   - 题目直接使用中文，不再补英文翻译；除非用户显式要求双语。
 
 ```md
 N. **中文题目**
-   English translation of the question.
 ```
 
 5. 保持该文件的编号连续；如果需要，局部重排编号，但不要为了微小格式问题重写整份文件。
@@ -139,7 +138,7 @@ N. **中文题目**
 - 同一道题没有在 `questions/` 或 `solutions/` 里重复出现。
 - `records/` 中的章节编号与 `questions/` / `solutions/` 文件名一致。
 - 新建的 `solutions/*.md` 文件标题与章节编号匹配。
-- 新增英文翻译自然、简洁，不要逐词硬译。
+- 新增题目表述自然、简洁，不要为了凑格式额外补英文。
 
 ## Classification Guidance
 

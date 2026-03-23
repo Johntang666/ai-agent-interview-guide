@@ -46,3 +46,7 @@
 
 13. **当前 LLM-based Agent 的主要局限性有哪些？**
     What are the main limitations of current LLM-based Agents?
+
+### 补充题目 / Additional Questions
+
+14. **如何定义一个 Agent？它通常由哪些核心组件构成？**
