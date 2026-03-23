@@ -46,3 +46,35 @@
 
 13. **Graph RAG 的核心思想是什么？与传统向量 RAG 有何区别？**
     What is the core idea of Graph RAG? How does it differ from traditional vector RAG?
+
+### 补充题目 / Additional Questions
+
+14. **请解释 RAG 的工作原理。与直接对 LLM 进行微调相比，RAG 主要解决了什么问题？有哪些优势？**
+    Explain how RAG works. Compared with directly fine-tuning an LLM, what problems does RAG mainly solve and what advantages does it offer?
+
+15. **RAG 是如何缓解 LLM 上下文窗口有限问题的？**
+    How does RAG mitigate the limitations of an LLM's context window?
+
+16. **除了基础的向量检索，你还知道哪些可以提升 RAG 检索质量的技术？**
+    Beyond basic vector retrieval, what techniques can improve retrieval quality in RAG?
+
+17. **如何全面评估一个 RAG 系统的性能？请分别从检索和生成两个阶段提出指标。**
+    How do you comprehensively evaluate a RAG system? Propose metrics for both retrieval and generation stages.
+
+18. **在什么场景下，你会选择图数据库或知识图谱来增强或替代传统向量数据库检索？**
+    In what scenarios would you use a graph database or knowledge graph to enhance or replace traditional vector database retrieval?
+
+19. **除了“先检索后生成”，你是否了解在生成过程中多次检索或自适应检索等更复杂的 RAG 范式？**
+    Beyond "retrieve then generate", are you familiar with more advanced RAG paradigms such as iterative retrieval during generation or adaptive retrieval?
+
+20. **RAG 系统在实际部署中可能面临哪些挑战？**
+    What challenges can a RAG system face in real-world deployment?
+
+21. **什么是 RAG 中的“幻觉”问题？如何预防？**
+    What is the hallucination problem in RAG, and how do you prevent it?
+
+22. **如果 RAG 系统返回 0 个检索结果，你会如何排查问题？**
+    If a RAG system returns zero retrieval results, how would you troubleshoot it?
+
+23. **了解 Transformer 吗？它与 RAG / Embedding 系统的关系是什么？**
+    Are you familiar with Transformers? What is their relationship to RAG and embedding systems?

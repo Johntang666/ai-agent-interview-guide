@@ -49,3 +49,8 @@
 
 14. **你认为 Agent 技术未来 2-3 年的发展方向是什么？**
     What do you think the development direction of Agent technology will be in the next 2-3 years?
+
+### 补充题目 / Additional Questions
+
+15. **当一个 Agent 需要在真实或模拟环境中（如机器人、游戏）执行任务时，它与纯粹基于软件工具的 Agent 有什么本质区别？**
+    When an Agent operates in a real or simulated environment, such as robotics or games, how is it fundamentally different from an Agent that only uses software tools?

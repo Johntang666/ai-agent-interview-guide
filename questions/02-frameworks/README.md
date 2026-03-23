@@ -43,3 +43,11 @@
 
 12. **如何实现 Agent 框架的可观测性（Observability）？**
     How do you implement observability in an Agent framework?
+
+### 补充题目 / Additional Questions
+
+13. **请比较 LangChain 和 LlamaIndex。它们的核心应用场景有何不同？**
+    Compare LangChain and LlamaIndex. How do their core application scenarios differ?
+
+14. **你用过哪些 Agent 框架？选型是如何做的？你最终场景的评价指标是什么？**
+    Which Agent frameworks have you used? How did you select among them, and what evaluation metrics mattered in the final scenario?

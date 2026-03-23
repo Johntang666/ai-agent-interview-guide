@@ -40,3 +40,8 @@
 
 11. **多 Agent 系统中的"社会模拟"（Social Simulation）有哪些应用？**
     What are the applications of "Social Simulation" in multi-agent systems?
+
+### 补充题目 / Additional Questions
+
+12. **什么是多智能体系统？让多个 LLM Agent 协同工作相比单个 Agent 有什么优势，又会引入哪些新的复杂性？**
+    What is a multi-agent system? Compared with a single Agent, what advantages does coordinating multiple LLM Agents bring, and what new complexities does it introduce?

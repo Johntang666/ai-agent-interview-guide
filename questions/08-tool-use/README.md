@@ -43,3 +43,11 @@
 
 12. **Agent 如何安全地执行代码（Code Execution / Sandboxing）？**
     How does an Agent safely execute code (Code Execution / Sandboxing)?
+
+### 补充题目 / Additional Questions
+
+13. **RAG、Function Calling、MCP 分别是什么？它们的原理和适用边界有什么不同？**
+    What are RAG, Function Calling, and MCP respectively? How do their principles and applicability boundaries differ?
+
+14. **WebSocket 和 SSE 有什么区别？各自更适合哪些实时交互场景？**
+    What are the differences between WebSocket and SSE, and which real-time interaction scenarios suit each better?
