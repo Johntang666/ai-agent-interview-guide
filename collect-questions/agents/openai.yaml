@@ -1,0 +1,7 @@
+interface:
+  display_name: "Collect Questions"
+  short_description: "Collect, classify, and answer AI Agent interview questions in this repo"
+  default_prompt: "Use $collect-questions to add the provided AI Agent interview questions into this repository, classify them into the right chapter, update the current monthly record, and create or refresh bilingual answers under solutions/."
+
+policy:
+  allow_implicit_invocation: true
