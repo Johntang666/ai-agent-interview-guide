@@ -51,3 +51,9 @@
 
 14. **WebSocket 和 SSE 有什么区别？各自更适合哪些实时交互场景？**
     What are the differences between WebSocket and SSE, and which real-time interaction scenarios suit each better?
+
+15. **什么是"工具检索"（Tool Retrieval）机制？什么时候需要它？与静态工具列表相比有什么优势？**
+
+16. **对比 MCP 与 A2A（Agent-to-Agent）协议，它们分别解决什么问题？如何共同构成智能体生态的基础协议？**
+
+17. **Agent 如何学习使用从未见过的新 API（通过阅读 API 文档自主学习）？**

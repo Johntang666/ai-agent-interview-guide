@@ -56,3 +56,9 @@
     When an Agent operates in a real or simulated environment, such as robotics or games, how is it fundamentally different from an Agent that only uses software tools?
 
 16. **在构建一个复杂的 Agent 时，你认为最主要的挑战是什么？**
+
+17. **如何实现 AI Agent 的终身学习（Lifelong Learning）？面临哪些技术挑战？**
+
+18. **AI Agent 在具身智能（Embodied Intelligence）领域的关键技术和应用前景是什么？**
+
+19. **模型蒸馏（Model Distillation）在 Agent 部署中扮演什么角色？如何平衡性能与成本？**

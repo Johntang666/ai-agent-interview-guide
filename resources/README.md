@@ -34,3 +34,24 @@
 - Lilian Weng - LLM Powered Autonomous Agents
 - Anthropic - Building effective agents
 - LangChain Blog - Agent architectures
+
+## 面试专题参考 / Interview Prep References
+
+### OpenClaw + AI Agent 面试八股文
+
+- 链接：[OpenClaw + AI Agent 面试八股文：背完这篇，你懂的比面试官还多！](https://zhuanlan.zhihu.com/p/2013536456132554764)
+- 类型：中文专题长文，偏面试准备与架构梳理
+- 适合搭配章节：
+  - `01-fundamentals`
+  - `02-frameworks`
+  - `03-design-patterns`
+  - `07-memory-and-rag`
+  - `08-tool-use`
+  - `10-real-world-cases`
+
+#### 参考说明
+
+- 这篇文章适合用来快速建立对 OpenClaw 的整体认知，尤其是“Agent 执行框架”和“普通对话工具”的区别。
+- 文中把 OpenClaw 拆成 Gateway、Brain、Memory、Skills、Heartbeat 五个组件，比较适合用于组织面试回答结构。
+- 对本地优先、消息平台接入、Skill 组织方式、Memory 分层、WebSocket 网关等工程点有较强的面试导向，适合做项目表达训练。
+- 文章本身偏“面试八股整理”，适合拿来建立答题框架，但具体实现细节、项目热度和趋势类表述，建议结合 OpenClaw 官方仓库与文档再做交叉确认。

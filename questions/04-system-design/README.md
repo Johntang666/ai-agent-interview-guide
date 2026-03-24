@@ -43,3 +43,9 @@
 
 12. **如何实现跨地域的 Agent 部署？需要考虑哪些因素？**
     How do you implement cross-region Agent deployment? What factors need consideration?
+
+13. **如何设计 Agent 的可观测性系统？解释 Tracing 和 Spans 在 Agent 调试中的作用。**
+
+14. **如何设计一个 Agent 来处理超长时间跨度的任务（如"研究一家公司的完整历史并撰写报告"）？如何防止 Agent 迷失或卡住？**
+
+15. **Agent 系统的工程化挑战：为什么说 AI 只完成了 30% 的工作，剩余 70% 是工具工程？如何设计可靠的工具工程架构？**

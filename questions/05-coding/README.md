@@ -50,3 +50,7 @@
 
 13. **有微调过 Agent 能力吗？相关数据集如何收集与构建？**
     Have you fine-tuned Agent capabilities? How do you collect and build the relevant datasets?
+
+14. **用 Python 实现一个简单的记忆检查点（Memory Checkpointer），支持保存和恢复 Agent 状态。**
+
+15. **如何设计一个对 LLM 幻觉参数名或参数值具有鲁棒性的工具调用函数？**

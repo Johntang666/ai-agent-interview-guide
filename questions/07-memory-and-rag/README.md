@@ -82,3 +82,11 @@
 
 25. **了解 Transformer 吗？它与 RAG / Embedding 系统的关系是什么？**
     Are you familiar with Transformers? What is their relationship to RAG and embedding systems?
+
+26. **Agent 使用向量数据库作为长期记忆时，如何处理记忆过时（Memory Staleness）问题？用户偏好变化时怎么办？**
+
+27. **什么是 RAG-Fusion？其核心技术和工作流程是什么？与标准 RAG 相比有哪些优势和不足？**
+
+28. **使用纯 LLM 上下文窗口作为主要记忆存储 vs 外部向量数据库，各有什么权衡？**
+
+29. **什么是 Prompt Compression 和 Context Caching？它们如何优化 Agent 的性能和成本？**

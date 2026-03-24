@@ -50,3 +50,9 @@
 ### 补充题目 / Additional Questions
 
 14. **如何定义一个 Agent？它通常由哪些核心组件构成？**
+
+15. **解释 AI Agent 的 PEAS 描述框架（Performance, Environment, Actuators, Sensors），如何用它来分析一个具体的 Agent 系统？**
+
+16. **什么是推理模型（Reasoning Model，如 OpenAI o3、DeepSeek-R1）？它们与普通 LLM 在 Agent 场景中的应用有何不同？**
+
+17. **解释 Next Token Prediction 的原理，以及它如何支撑 Agent 的推理与生成能力。**

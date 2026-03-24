@@ -51,3 +51,9 @@
 
 14. **如何确保一个 Agent 的行为是安全、可控且符合人类意图的？常见的对齐与保障方法有哪些？**
     How do you ensure an Agent behaves safely, controllably, and aligned with human intent? What common alignment and safeguard methods are used?
+
+15. **什么是 Constitutional AI？在 Agent 自主决策场景中如何应用？**
+
+16. **Agent 即将执行不可逆操作（如删除用户文件、发送未授权请求）时，系统应如何设计以确保安全？**
+
+17. **如何设计 Agent 的自动化评估管线（Evals），系统化地评估执行多步复杂任务的 Agent？**

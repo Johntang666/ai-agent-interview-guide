@@ -47,3 +47,9 @@
     What is a multi-agent system? Compared with a single Agent, what advantages does coordinating multiple LLM Agents bring, and what new complexities does it introduce?
 
 13. **多 Agent 协作时，如何设计 Agent 之间的通信和协调机制？**
+
+14. **对比 Supervisor-based 多智能体系统与 Peer-to-Peer 协作系统，什么场景下选择哪种架构？**
+
+15. **在什么场景下单体 Agent 比多 Agent 系统更好？请举例说明。**
+
+16. **联邦学习（Federated Learning）在多 Agent 系统中如何应用？**
