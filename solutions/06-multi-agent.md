@@ -541,3 +541,290 @@ async def main():
 - **安全增强**：通过差分隐私（给梯度加噪声）、安全聚合（加密传输）、梯度裁剪等技术防护隐私泄露和恶意攻击。
 
 一句话总结：联邦学习为多 Agent 系统提供了"共享智慧但不共享数据"的协作范式，是隐私保护与集体智能提升之间的关键桥梁。
+
+---
+
+### Q: 从单体 Agent 到 Agent Swarm（蜂群架构）的演进路径是什么？如何设计任务自动拆解和 Agent 动态分配的系统？
+
+> 🤖 **Claude**
+
+#### 1. 网络整合回答
+
+**演进三阶段：单体 → 团队 → 蜂群**
+
+AI Agent 架构经历了清晰的三阶段演进。第一阶段是**单体 Agent（Monolithic Agent）**：一个 LLM 承担所有角色——规划、推理、工具调用、输出生成全部由同一个 Agent 完成。这种模式实现简单但存在明显天花板：上下文窗口有限、推理链过长容易累积错误、无法并行处理子任务、单点故障风险高。
+
+第二阶段是**多 Agent 团队（Multi-Agent Team）**：将不同职责拆分到多个专职 Agent 上（如 Planner、Coder、Reviewer、Tester），通过预定义的通信拓扑（链式、星形、层次化）进行协作。代表框架包括 AutoGen、CrewAI、LangGraph 等。这一阶段的核心改进是角色分工带来的专业化和相互校验能力，但拓扑结构通常是静态的，Agent 数量和分工在设计时确定，难以适应动态变化的任务复杂度。
+
+第三阶段是**Agent Swarm（蜂群架构）**：受群体智能（Swarm Intelligence）启发，Agent 不再依赖中心化的静态编排，而是通过去中心化或半中心化的方式实现**动态任务分解、Agent 按需生成与销毁、自组织协调**。2025 年 OpenAI 发布的 Swarm 框架率先提出了轻量级的 Agent 编排思想——通过 Handoff 机制让 Agent 之间自主传递控制权，无需复杂的中心调度器。2025-2026 年间，Swarms.ai 等企业级框架进一步将其推向生产环境，支持 SequentialWorkflow、ConcurrentWorkflow、AgentRearrange 等多种预构建的多 Agent 架构模式。
+
+**动态任务分解（Dynamic Task Decomposition）**是蜂群架构的核心能力。2024 年的 TDAG（Task Decomposition and Agent Generation）框架提出了一种范式：给定一个复杂任务，先由 Meta-Agent 将其递归分解为子任务树（Task DAG），再为每个子任务动态生成最合适的子 Agent（包括选择模型、工具集和 System Prompt）。2025 年末的 CD³T（Conditional Diffusion for Dynamic Task Decomposition）进一步引入条件扩散模型，通过层次化多智能体强化学习自动推断子任务划分和协调模式，无需人工预定义任务结构。
+
+**Agent 池化与弹性伸缩**方面，蜂群架构借鉴了微服务和 Serverless 的思想：维护一个 Agent Pool，每个 Agent 有能力标签（skill tags）和负载状态；Orchestrator 根据任务需求从池中匹配或动态创建 Agent；任务完成后 Agent 回收到池中或销毁。负载均衡策略包括基于能力匹配的路由（capability-based routing）、基于队列深度的分发、以及基于历史表现的优先级排序。据统计，Databricks 平台上多 Agent 工作流的采用量在 2025 年 6 月至 10 月间增长了 327%，到 2026 年初，67% 的大型企业已在生产环境中运行自主 AI Agent，印证了蜂群架构从学术走向工业落地的加速趋势。
+
+#### 2. 结合实际例子
+
+以下是一个 Agent Swarm 任务调度系统的 Python 实现示例，展示了动态任务分解、Agent 池化管理和自动分配的核心机制：
+
+```python
+import asyncio
+import uuid
+from enum import Enum
+from dataclasses import dataclass, field
+from typing import Callable, Optional
+
+
+# ============================================
+# 核心数据结构
+# ============================================
+
+class TaskStatus(Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class AgentStatus(Enum):
+    IDLE = "idle"
+    BUSY = "busy"
+    TERMINATED = "terminated"
+
+@dataclass
+class SubTask:
+    """子任务：动态分解后的最小执行单元"""
+    task_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
+    description: str = ""
+    required_skills: list[str] = field(default_factory=list)
+    priority: int = 0          # 越大越优先
+    dependencies: list[str] = field(default_factory=list)  # 依赖的其他 task_id
+    status: TaskStatus = TaskStatus.PENDING
+    result: Optional[str] = None
+
+@dataclass
+class SwarmAgent:
+    """蜂群中的 Agent 实例"""
+    agent_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
+    skills: list[str] = field(default_factory=list)
+    status: AgentStatus = AgentStatus.IDLE
+    completed_tasks: int = 0
+    success_rate: float = 1.0
+
+    def match_score(self, required_skills: list[str]) -> float:
+        """计算 Agent 与任务的能力匹配度"""
+        if not required_skills:
+            return 0.5
+        matched = len(set(self.skills) & set(required_skills))
+        return (matched / len(required_skills)) * self.success_rate
+
+
+# ============================================
+# 任务分解器：将复杂任务递归拆解为子任务 DAG
+# ============================================
+
+class TaskDecomposer:
+    """
+    模拟 LLM 驱动的动态任务分解。
+    生产环境中此处调用 LLM 生成子任务结构。
+    """
+
+    DECOMPOSITION_RULES: dict[str, list[dict]] = {
+        "build_feature": [
+            {"desc": "需求分析与方案设计", "skills": ["planning"], "priority": 3, "deps": []},
+            {"desc": "编写核心代码",       "skills": ["coding"],   "priority": 2, "deps": ["需求分析与方案设计"]},
+            {"desc": "编写单元测试",       "skills": ["testing"],  "priority": 2, "deps": ["需求分析与方案设计"]},
+            {"desc": "代码审查与安全检查", "skills": ["review", "security"], "priority": 1, "deps": ["编写核心代码", "编写单元测试"]},
+            {"desc": "文档编写",           "skills": ["writing"],  "priority": 0, "deps": ["代码审查与安全检查"]},
+        ],
+        "incident_response": [
+            {"desc": "告警分类与严重性评估", "skills": ["monitoring"], "priority": 3, "deps": []},
+            {"desc": "根因分析",             "skills": ["debugging"],  "priority": 2, "deps": ["告警分类与严重性评估"]},
+            {"desc": "制定修复方案",         "skills": ["planning"],   "priority": 2, "deps": ["根因分析"]},
+            {"desc": "执行修复并验证",       "skills": ["coding", "testing"], "priority": 1, "deps": ["制定修复方案"]},
+            {"desc": "撰写事故报告",         "skills": ["writing"],    "priority": 0, "deps": ["执行修复并验证"]},
+        ],
+    }
+
+    def decompose(self, task_type: str, description: str) -> list[SubTask]:
+        """动态分解任务，返回子任务列表（含依赖关系的 DAG）"""
+        rules = self.DECOMPOSITION_RULES.get(task_type, [
+            {"desc": description, "skills": ["general"], "priority": 0, "deps": []}
+        ])
+
+        # 先创建所有子任务
+        subtasks: list[SubTask] = []
+        desc_to_id: dict[str, str] = {}
+
+        for rule in rules:
+            st = SubTask(
+                description=rule["desc"],
+                required_skills=rule["skills"],
+                priority=rule["priority"],
+            )
+            desc_to_id[rule["desc"]] = st.task_id
+            subtasks.append(st)
+
+        # 再填充依赖 ID
+        for st, rule in zip(subtasks, rules):
+            st.dependencies = [desc_to_id[d] for d in rule["deps"] if d in desc_to_id]
+
+        print(f"[Decomposer] 任务 '{description}' 分解为 {len(subtasks)} 个子任务")
+        return subtasks
+
+
+# ============================================
+# 蜂群调度器：Agent 池化 + 动态分配 + 弹性伸缩
+# ============================================
+
+class SwarmOrchestrator:
+    """Agent Swarm 核心调度器"""
+
+    def __init__(self, max_agents: int = 10):
+        self.agent_pool: list[SwarmAgent] = []
+        self.max_agents = max_agents
+        self.decomposer = TaskDecomposer()
+        self.task_queue: list[SubTask] = []
+        self.completed: list[SubTask] = []
+
+    # ---------- Agent 池管理 ----------
+
+    def spawn_agent(self, skills: list[str]) -> SwarmAgent:
+        """按需创建新 Agent（弹性伸缩 Scale-Out）"""
+        if len(self.agent_pool) >= self.max_agents:
+            print(f"[Swarm] Agent 池已满 ({self.max_agents})，等待回收")
+            return None
+        agent = SwarmAgent(skills=skills)
+        self.agent_pool.append(agent)
+        print(f"[Swarm] 创建 Agent-{agent.agent_id}，技能: {skills}")
+        return agent
+
+    def recycle_idle_agents(self):
+        """回收长期空闲的 Agent（Scale-In）"""
+        before = len(self.agent_pool)
+        self.agent_pool = [
+            a for a in self.agent_pool if a.status != AgentStatus.TERMINATED
+        ]
+        freed = before - len(self.agent_pool)
+        if freed > 0:
+            print(f"[Swarm] 回收 {freed} 个已终止 Agent")
+
+    # ---------- 能力匹配路由 ----------
+
+    def find_best_agent(self, task: SubTask) -> Optional[SwarmAgent]:
+        """基于 capability matching + 历史成功率 选择最优 Agent"""
+        idle_agents = [a for a in self.agent_pool if a.status == AgentStatus.IDLE]
+
+        if not idle_agents:
+            # 尝试动态创建
+            return self.spawn_agent(task.required_skills)
+
+        scored = [(a, a.match_score(task.required_skills)) for a in idle_agents]
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        best_agent, best_score = scored[0]
+        if best_score > 0:
+            return best_agent
+
+        # 没有匹配的，动态创建专用 Agent
+        return self.spawn_agent(task.required_skills)
+
+    # ---------- DAG 调度核心 ----------
+
+    def get_ready_tasks(self) -> list[SubTask]:
+        """获取所有依赖已满足、可立即执行的任务"""
+        completed_ids = {t.task_id for t in self.completed}
+        ready = [
+            t for t in self.task_queue
+            if t.status == TaskStatus.PENDING
+            and all(dep in completed_ids for dep in t.dependencies)
+        ]
+        ready.sort(key=lambda t: t.priority, reverse=True)
+        return ready
+
+    async def execute_task(self, agent: SwarmAgent, task: SubTask):
+        """Agent 执行子任务（模拟 LLM 推理）"""
+        agent.status = AgentStatus.BUSY
+        task.status = TaskStatus.RUNNING
+        print(f"  [Agent-{agent.agent_id}] 开始执行: {task.description}")
+
+        # 模拟耗时（实际场景中调用 LLM API）
+        await asyncio.sleep(0.3)
+
+        task.status = TaskStatus.COMPLETED
+        task.result = f"Done by Agent-{agent.agent_id}"
+        agent.status = AgentStatus.IDLE
+        agent.completed_tasks += 1
+        self.completed.append(task)
+        print(f"  [Agent-{agent.agent_id}] 完成: {task.description}")
+
+    # ---------- 主调度循环 ----------
+
+    async def run(self, task_type: str, description: str):
+        """端到端执行：分解 → 调度 → 并行执行 → 汇总"""
+        print(f"\n{'='*60}")
+        print(f"[Swarm] 接收任务: {description}")
+        print(f"{'='*60}")
+
+        # Step 1: 动态任务分解
+        self.task_queue = self.decomposer.decompose(task_type, description)
+        self.completed = []
+
+        # Step 2: DAG 驱动的调度循环
+        while len(self.completed) < len(self.task_queue):
+            ready = self.get_ready_tasks()
+            if not ready:
+                await asyncio.sleep(0.1)
+                continue
+
+            # Step 3: 并行分配和执行就绪任务
+            coroutines = []
+            for task in ready:
+                agent = self.find_best_agent(task)
+                if agent:
+                    coroutines.append(self.execute_task(agent, task))
+                else:
+                    break  # 无可用 Agent，等待下一轮
+
+            if coroutines:
+                await asyncio.gather(*coroutines)
+
+        # Step 4: 汇总结果
+        print(f"\n[Swarm] 任务完成！共执行 {len(self.completed)} 个子任务，"
+              f"使用 {len(self.agent_pool)} 个 Agent")
+        print(f"  Agent 利用率:")
+        for a in self.agent_pool:
+            print(f"    Agent-{a.agent_id}: 完成 {a.completed_tasks} 个任务, "
+                  f"技能 {a.skills}")
+
+
+# ============================================
+# 使用示例
+# ============================================
+
+async def main():
+    swarm = SwarmOrchestrator(max_agents=5)
+
+    # 预注册一些通用 Agent
+    swarm.spawn_agent(["planning", "writing"])
+    swarm.spawn_agent(["coding", "debugging"])
+    swarm.spawn_agent(["testing", "review"])
+
+    # 执行一个功能开发任务
+    await swarm.run("build_feature", "实现用户权限管理模块")
+
+    # 执行一个事故响应任务（复用 Agent 池）
+    await swarm.run("incident_response", "数据库连接池耗尽告警")
+
+asyncio.run(main())
+```
+
+这个示例展示了蜂群架构的四个核心机制：**TaskDecomposer** 将高层任务动态拆解为带依赖关系的子任务 DAG；**SwarmOrchestrator** 通过 capability-based routing 将子任务匹配给最合适的 Agent；**Agent Pool** 支持按需创建和回收（弹性伸缩）；**DAG Scheduler** 自动识别可并行执行的子任务并发调度，最大化吞吐量。
+
+#### 3. 面试核心回答
+
+- **三阶段演进路径**：单体 Agent（一个 LLM 包办一切）→ 多 Agent 团队（静态角色分工 + 预定义拓扑）→ Agent Swarm（动态生成、自组织、弹性伸缩）。每一步都是为了解决上一阶段的扩展性和鲁棒性瓶颈。
+- **动态任务分解**：核心是由 Meta-Agent 或专用 Planner 将复杂任务递归分解为子任务 DAG（有向无环图），每个子任务标注所需能力（required skills）和依赖关系，支持自动发现并行机会。TDAG 和 CD³T 是该方向的代表性工作。
+- **Agent 池化与动态分配**：借鉴微服务思想，维护 Agent Pool，每个 Agent 有能力标签和负载状态；调度器通过 capability matching + 历史成功率进行路由，无匹配 Agent 时动态创建（Scale-Out），任务完成后回收（Scale-In）。
+- **关键设计挑战**：Agent 间通信开销与一致性、子任务失败的级联处理与重试策略、全局死锁检测、以及如何避免过度分解导致的协调成本超过收益。
+- **工程落地要点**：OpenAI Swarm 用 Handoff 实现轻量级控制权传递，Swarms.ai 提供企业级编排框架（支持 Sequential / Concurrent / AgentRearrange 等模式），LangGraph 用图结构实现显式控制流——选型取决于任务复杂度和团队技术栈。
+
+一句话总结：Agent Swarm 是多智能体系统从"静态编排"走向"动态自组织"的关键跃迁，其核心在于将任务自动分解为 DAG、将 Agent 池化管理并按能力动态匹配，从而实现类似微服务弹性伸缩的智能体调度能力。

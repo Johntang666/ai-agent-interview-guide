@@ -52,5 +52,7 @@
 14. **说下 ReAct 框架。它是如何将思维链和行动结合起来，以完成复杂任务的？你还了解 Plan-and-Solve 和 Reflection 吗？**
     Explain the ReAct framework. How does it combine reasoning and action to solve complex tasks? Are you also familiar with Plan-and-Solve and Reflection?
 
-15. **在 Agent 的设计中，“规划能力”至关重要。有哪些主流方法可以赋予 LLM 规划能力？例如 CoT、ToT、GoT 等。**
+15. **在 Agent 的设计中，”规划能力”至关重要。有哪些主流方法可以赋予 LLM 规划能力？例如 CoT、ToT、GoT 等。**
     In Agent design, planning is critical. What mainstream methods can give LLMs planning capability, such as CoT, ToT, and GoT?
+
+16. **对比 Agent 执行中的并行与串行任务模式。如何在 Agentic 工作流中决定何时并行、何时串行？设计上有什么原则和权衡？**

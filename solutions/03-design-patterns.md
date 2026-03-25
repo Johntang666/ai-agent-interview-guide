@@ -138,4 +138,174 @@ class ReflectiveAgent(ReActAgent):
 - Plan-and-Execute 解决任务拆分，Reflection / Re-planning 解决执行中的修正。
 - 真正的规划能力不止靠 Prompt，还要配合状态、工具和反馈机制。
 
-一句话总结：LLM 的规划能力来自“显式分解任务并在执行中持续更新计划”，而不是一次生成一个完美答案。
+一句话总结：LLM 的规划能力来自”显式分解任务并在执行中持续更新计划”，而不是一次生成一个完美答案。
+
+---
+
+### Q: 对比 Agent 执行中的并行与串行任务模式。如何在 Agentic 工作流中决定何时并行、何时串行？设计上有什么原则和权衡？
+
+> 🤖 **Claude**
+
+#### 1. 网络整合回答
+
+在 Agentic AI 系统中，任务执行模式分为**串行（Sequential）**和**并行（Parallel）**两大类，它们是工作流编排的基础构建块。
+
+**串行执行**是指任务按预定义顺序依次执行，Agent A 的输出作为 Agent B 的输入，形成线性流水线（Pipeline）。串行模式天然保证了上下文的连贯性和因果一致性，适用于存在**强数据依赖**的场景——例如”先检索文档 → 再摘要 → 再生成回答”这类链式任务。串行的缺点是延迟会线性累加：如果每个步骤耗时 2 秒，5 个步骤就需要 10 秒。
+
+**并行执行**是指多个无依赖关系的子任务同时分发给不同 Agent 并发处理，最后由一个 Aggregator 汇总结果。这对应分布式系统中经典的 **Fan-out/Fan-in（扇出/扇入）** 模式，也叫 **Scatter-Gather** 或 **Map-Reduce** 模式。并行执行的核心优势是**降低端到端延迟**——总耗时取决于最慢的那条分支（critical path），而不是所有任务耗时之和。
+
+如何决定何时并行、何时串行？核心在于**依赖分析（Dependency Analysis）**。业界主流做法是将任务建模为 **DAG（有向无环图）**：每个任务是图中的节点，数据依赖是有向边。没有入边的节点可以立即并行启动；有入边的节点必须等所有上游完成后才能执行。Google 在 2026 年初总结的八大 Multi-Agent 设计模式中，将 Sequential、Loop 和 Parallel 列为三种基础执行模式，并建议**默认使用串行，当延迟成为瓶颈且任务相互独立时再切换到并行**。
+
+设计原则与权衡包括：（1）**正确性优先**——有状态共享或写冲突的任务必须串行，否则会出现竞态条件（Race Condition）；（2）**延迟 vs 资源成本**——并行降低延迟但消耗更多计算资源和 API 调用配额；（3）**错误传播**——串行模式中一个步骤失败即可停止整条链，并行模式需要设计部分失败处理策略（Partial Failure Handling），如超时重试、降级返回；（4）**结果一致性**——并行分支的结果可能存在冲突，Aggregator 需要有冲突解决（Conflict Resolution）机制；（5）**可观测性**——并行执行的调试和日志追踪比串行复杂得多，需要 Trace ID 和 Span 来关联并发分支。
+
+LAMaS（Latency-Aware Multi-Agent System）等前沿框架进一步提出了**层级并行（Layer-wise Parallel Execution）**思路：通过自动识别并移除不必要的执行依赖，学习出更短 critical path 的执行图，在保证正确性的前提下最大化并行度。
+
+#### 2. 结合实际例子
+
+以下是一个支持并行和串行混合调度的 Agent 任务调度器实现：
+
+```python
+import asyncio
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Awaitable
+
+
+class ExecMode(Enum):
+    SEQUENTIAL = “sequential”
+    PARALLEL = “parallel”
+
+
+@dataclass
+class Task:
+    name: str
+    execute: Callable[..., Awaitable[Any]]  # 异步可调用
+    dependencies: list[str] = field(default_factory=list)  # 依赖的任务名称
+
+
+class AgentTaskScheduler:
+    “””基于 DAG 的 Agent 任务调度器，自动识别可并行的任务组”””
+
+    def __init__(self, tasks: list[Task]):
+        self.tasks = {t.name: t for t in tasks}
+        self.results: dict[str, Any] = {}
+
+    def _build_execution_layers(self) -> list[list[str]]:
+        “””拓扑排序，将任务分成可并行执行的层”””
+        in_degree = {name: 0 for name in self.tasks}
+        for t in self.tasks.values():
+            for dep in t.dependencies:
+                in_degree[t.name] += 1  # 计算入度
+
+        layers = []
+        remaining = set(self.tasks.keys())
+
+        while remaining:
+            # 找出所有入度为 0 的任务 —— 它们可以并行执行
+            ready = [
+                name for name in remaining
+                if all(dep not in remaining for dep in self.tasks[name].dependencies)
+            ]
+            if not ready:
+                raise ValueError(“检测到循环依赖，无法调度”)
+            layers.append(ready)
+            remaining -= set(ready)
+
+        return layers
+
+    async def run(self) -> dict[str, Any]:
+        “””按层执行：层内并行（Fan-out），层间串行（等待 Fan-in）”””
+        layers = self._build_execution_layers()
+        print(f”执行计划: {len(layers)} 层”)
+
+        for i, layer in enumerate(layers):
+            mode = ExecMode.PARALLEL if len(layer) > 1 else ExecMode.SEQUENTIAL
+            print(f”  第 {i+1} 层 [{mode.value}]: {layer}”)
+
+            if mode == ExecMode.PARALLEL:
+                # Fan-out: 所有无依赖任务并发执行
+                coros = [
+                    self._execute_task(name) for name in layer
+                ]
+                results = await asyncio.gather(*coros, return_exceptions=True)
+                for name, result in zip(layer, results):
+                    if isinstance(result, Exception):
+                        print(f”    ⚠ 任务 {name} 失败: {result}”)
+                        self.results[name] = None  # 降级处理
+                    else:
+                        self.results[name] = result
+            else:
+                # 单任务直接串行执行
+                for name in layer:
+                    self.results[name] = await self._execute_task(name)
+
+        return self.results
+
+    async def _execute_task(self, name: str) -> Any:
+        task = self.tasks[name]
+        # 收集依赖任务的结果作为输入
+        dep_results = {dep: self.results[dep] for dep in task.dependencies}
+        print(f”    ▶ 执行 {name} (依赖输入: {list(dep_results.keys())})”)
+        result = await task.execute(dep_results)
+        print(f”    ✓ 完成 {name}”)
+        return result
+
+
+# ---------- 使用示例 ----------
+async def search_web(inputs):
+    await asyncio.sleep(1)  # 模拟网络请求
+    return {“web_results”: “搜索结果...”}
+
+async def query_database(inputs):
+    await asyncio.sleep(1.5)
+    return {“db_results”: “数据库记录...”}
+
+async def call_api(inputs):
+    await asyncio.sleep(0.8)
+    return {“api_results”: “API 返回...”}
+
+async def summarize(inputs):
+    “””依赖前三个任务的结果，必须串行等待”””
+    all_data = {k: v for dep in inputs.values() for k, v in dep.items()}
+    await asyncio.sleep(0.5)
+    return {“summary”: f”基于 {len(all_data)} 个数据源的综合摘要”}
+
+async def generate_report(inputs):
+    summary = inputs[“summarize”][“summary”]
+    await asyncio.sleep(0.3)
+    return {“report”: f”最终报告 — {summary}”}
+
+
+async def main():
+    tasks = [
+        Task(“search_web”, search_web),          # 无依赖 → 第1层
+        Task(“query_database”, query_database),   # 无依赖 → 第1层
+        Task(“call_api”, call_api),               # 无依赖 → 第1层
+        Task(“summarize”, summarize,              # 依赖前三个 → 第2层
+             dependencies=[“search_web”, “query_database”, “call_api”]),
+        Task(“generate_report”, generate_report,  # 依赖 summarize → 第3层
+             dependencies=[“summarize”]),
+    ]
+
+    scheduler = AgentTaskScheduler(tasks)
+    results = await scheduler.run()
+    # 执行计划: 3 层
+    #   第 1 层 [parallel]:   search_web, query_database, call_api  (~1.5s)
+    #   第 2 层 [sequential]: summarize                             (~0.5s)
+    #   第 3 层 [sequential]: generate_report                       (~0.3s)
+    # 总耗时约 2.3s，而纯串行需要 1+1.5+0.8+0.5+0.3 = 4.1s
+
+asyncio.run(main())
+```
+
+该调度器的核心思路：通过拓扑排序自动将任务分层，同一层内的任务没有相互依赖，可以用 `asyncio.gather` 并行执行（Fan-out）；层与层之间必须等待上一层全部完成（Fan-in）才能继续。这就是 DAG 调度的精髓——**自动发现最大并行度，同时保证依赖正确性**。
+
+#### 3. 面试核心回答
+
+- **串行（Sequential）适用于存在数据依赖的链式任务**，保证上下文连贯和因果一致性，缺点是延迟线性累加。
+- **并行（Parallel）适用于多个独立子任务**，通过 Fan-out/Fan-in 模式将总耗时压缩到最慢分支的耗时，但需要更多资源和更复杂的错误处理。
+- **决策依据是依赖分析**：将任务建模为 DAG，通过拓扑排序自动识别可并行的任务层，无依赖的任务并行、有依赖的任务串行。
+- **关键权衡包括四点**：正确性（避免竞态条件）、延迟 vs 资源成本、部分失败处理策略、以及并发执行的可观测性。
+- **设计原则是”默认串行，按需并行”**：先保证正确性，当延迟成为瓶颈且任务确实独立时，再引入并行。
+
+一句话总结：串行保证顺序正确，并行压缩执行时间，核心决策工具是 DAG 依赖分析——无依赖则并行，有依赖则串行，先求正确再求快。

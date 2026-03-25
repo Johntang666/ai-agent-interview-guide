@@ -90,3 +90,9 @@
 28. **使用纯 LLM 上下文窗口作为主要记忆存储 vs 外部向量数据库，各有什么权衡？**
 
 29. **什么是 Prompt Compression 和 Context Caching？它们如何优化 Agent 的性能和成本？**
+
+30. **什么是 HyDE（Hypothetical Document Embeddings）？它如何提升零样本场景下的 RAG 检索质量？**
+
+31. **搜索引擎与 RAG 系统有什么本质区别？各自的优势场景是什么？**
+
+32. **RAG 中的 "Lost in the Middle" 现象是什么？它如何影响生成质量？有哪些缓解策略？**

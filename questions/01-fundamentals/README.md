@@ -56,3 +56,5 @@
 16. **什么是推理模型（Reasoning Model，如 OpenAI o3、DeepSeek-R1）？它们与普通 LLM 在 Agent 场景中的应用有何不同？**
 
 17. **解释 Next Token Prediction 的原理，以及它如何支撑 Agent 的推理与生成能力。**
+
+18. **Scaling Laws 揭示了模型参数量、数据量和计算量之间什么关系？它对 Agent 系统中的模型选型有什么指导意义？**
