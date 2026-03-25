@@ -1468,3 +1468,350 @@ if __name__ == "__main__":
 - **Agentic 场景的放大效应**：缓存命中不仅节省一次 LLM 调用，还能短路整条推理链——跳过后续的检索、推理和级联工具调用，实际节省可达标称成本的 3-5 倍。
 
 一句话总结：语义缓存通过 embedding + 余弦相似度将缓存粒度从"字面一致"提升到"语义等价"，配合按工具分桶隔离、分层阈值和 TTL 策略，能以极低的接入成本（装饰器一行）实现 LLM 调用量 50-90% 的缩减。
+
+---
+
+### Q: 用 Python 实现一个最简单的 ReAct Agent（不使用任何框架）。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+最小 ReAct Agent 的核心就是一个 while loop：把用户问题、已有 scratchpad 和工具描述发给模型；模型返回 Thought 和 Action；如果是工具调用，就执行并把 Observation 拼回上下文；如果是 Final Answer，就结束。  
+实现时最重要的不是功能多，而是协议清晰。你要明确模型输出格式、最大步数、工具错误处理和终止条件。否则很容易进入死循环或解析失败。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+while step < max_steps:
+    response = llm(prompt + scratchpad)
+    thought, action = parse(response)
+    if action.type == "final":
+        return action.answer
+    obs = tools[action.name](**action.args)
+    scratchpad += f"\nThought: {thought}\nAction: {action}\nObservation: {obs}"
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- 最简 ReAct = 模型推理 + 工具执行 + 观察回填循环。
+- 必须限制步数、约束输出格式、处理工具异常。
+- 重点不是复杂框架，而是闭环是否稳定。
+
+一句话总结：手写 ReAct 的本质是把"想一步、做一步、看结果"写成一个可控循环。
+
+---
+
+### Q: 实现一个支持 Function Calling 的 Agent 循环。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+Function Calling 循环通常是：先向模型提供工具 schema，模型返回要调用的函数名和参数，执行器根据 schema 校验参数并调用真实函数，再把结果作为 tool message 回传给模型，直到模型返回最终自然语言答案。  
+生产实现里要特别注意参数校验和工具结果结构化。模型可能选对工具但传错参数，所以执行前一定要做 schema validate；工具返回也最好是 JSON，便于后续继续推理。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+messages = [{"role": "user", "content": question}]
+while True:
+    resp = client.responses.create(model=model, tools=tool_schemas, input=messages)
+    if not resp.tool_calls:
+        return resp.output_text
+    for call in resp.tool_calls:
+        args = validate(call.arguments, schema_map[call.name])
+        result = tool_map[call.name](**args)
+        messages.append({"role": "tool", "name": call.name, "content": json.dumps(result)})
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- Function Calling 循环本质是"模型决定 -> 执行器校验执行 -> 结果回填"。
+- 模型不直接执行工具，执行器才是真正的安全边界。
+- schema 校验和结构化返回是稳定性的关键。
+
+一句话总结：支持 Function Calling 的 Agent，本质上是一个围绕结构化工具调用搭起来的事件循环。
+
+---
+
+### Q: 编写一个具有短期记忆（对话历史）和长期记忆（向量存储）的 Agent。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+这类 Agent 通常把短期记忆存在会话状态里，把长期记忆存在向量库或其他持久化存储里。运行时先读取短期对话上下文，再根据当前问题检索长期记忆片段，最后把两者一起送给模型。  
+设计难点不在于"把历史都塞进去"，而在于摘要和筛选。短期历史过长要做压缩，长期记忆要控制召回质量和写入策略，避免把低质量噪声永久存进去。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+history = session_store.get(session_id)
+memories = vector_store.search(embed(user_query), top_k=3)
+prompt = build_prompt(history=history[-8:], memories=memories, query=user_query)
+answer = llm(prompt)
+session_store.append(session_id, {"user": user_query, "assistant": answer})
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- 短期记忆保当前会话，长期记忆保跨会话经验。
+- 关键是召回和摘要，不是无限堆上下文。
+- 写入长期记忆要有质量门槛和更新策略。
+
+一句话总结：带记忆的 Agent，核心是让上下文既连续又不过载。
+
+---
+
+### Q: 实现一个 Plan-and-Execute Agent，先制定计划再逐步执行。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+Plan-and-Execute 的实现通常分成两个阶段。规划器先把任务拆成若干有序步骤；执行器按步骤运行，每完成一步都更新状态；如果某步失败，可以局部重试或触发重规划。  
+设计重点是计划要结构化，例如列表、状态和依赖，而不是一段自由文本。否则执行器很难准确消费计划。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+plan = planner_llm(f"请把任务拆成步骤: {task}")
+for item in plan["steps"]:
+    result = run_step(item, context)
+    context["completed"].append({"step": item, "result": result})
+    if result.get("need_replan"):
+        plan = replanner(plan, context)
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- Plan-and-Execute 把"想怎么做"和"真正执行"分开。
+- 计划必须结构化，执行过程必须可更新状态。
+- 实用系统还要支持局部失败后的重规划。
+
+一句话总结：Plan-and-Execute 的价值在于先把复杂任务拆开，再把执行过程收进状态机。
+
+---
+
+### Q: 编写一个让 LLM 稳定输出结构化 JSON 的 System Prompt。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+让模型稳定输出 JSON，system prompt 需要同时约束格式和失败行为。通常要明确：只输出 JSON、不允许额外解释、字段名固定、字段类型固定、缺失信息如何处理、非法值如何置空。  
+仅靠 prompt 还不够，最好再结合 schema 校验和重试。因为模型即便理解要求，也可能在边界 case 下多说一句或字段拼错。
+
+#### 2. 结合实际例子 / Practical Example
+
+```text
+你必须只输出一个合法 JSON 对象。
+禁止输出 markdown、解释文字、注释。
+字段:
+- intent: string
+- confidence: number in [0,1]
+- entities: array
+若无法判断, 使用 null 或空数组。
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- prompt 要同时约束输出格式、字段类型和失败时行为。
+- "只输出 JSON"、"字段固定"、"无法判断如何填"要写清楚。
+- 生产里一定要配 schema 校验和重试。
+
+一句话总结：稳定 JSON 不是靠一句"请返回 JSON"，而是靠格式约束加校验闭环。
+
+---
+
+### Q: 设计一个 Router Agent 的 Prompt，能根据用户意图路由到不同的子 Agent。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+Router Prompt 的重点是分类边界清晰。你要明确有哪些子 Agent、各自负责什么、何时路由、何时拒绝或转人工。输出最好是结构化结果，例如 `target_agent`、`reason`、`confidence`。  
+一个常见错误是把路由条件写得太抽象，导致模型什么都能归到多个 agent。更稳妥的写法是给每个子 Agent 明确正例、反例和冲突处理规则。
+
+#### 2. 结合实际例子 / Practical Example
+
+```text
+你是路由器，只负责分类，不回答问题。
+可选目标:
+1. billing_agent: 发票、退款、支付异常
+2. logistics_agent: 物流、签收、退货进度
+3. policy_agent: 规则解释、政策咨询
+若问题同时涉及敏感赔付，输出 human_review。
+返回 JSON: {target_agent, confidence, reason}
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- Router Prompt 核心是边界清晰、输出结构化。
+- 每个子 Agent 要有职责定义、正反例和冲突规则。
+- 路由器负责分发，不负责回答。
+
+一句话总结：好的 Router Prompt 不是让模型更会说，而是让它更少分错。
+
+---
+
+### Q: 如何通过 Prompt 实现 few-shot 工具选择？
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+few-shot 工具选择的关键是给模型展示"什么问题对应什么工具、为什么、参数长什么样"。示例最好覆盖相似工具之间的区分，例如查询订单和取消订单、读数据和写数据。  
+如果只给工具描述不给例子，模型在边界 case 上容易混淆。few-shot 的价值就在于把抽象规则变成可模仿模式。
+
+#### 2. 结合实际例子 / Practical Example
+
+```text
+示例1:
+用户: 查询订单 123 的状态
+应选工具: get_order_status(order_id="123")
+
+示例2:
+用户: 取消订单 123
+应选工具: cancel_order(order_id="123")
+
+示例3:
+用户: 帮我看看订单大概到哪了
+应选工具: get_order_status(...)
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- few-shot 要展示工具选择逻辑，而不只是列工具名。
+- 示例应覆盖相似工具的边界差异。
+- 最佳实践是示例 + schema + 规则联合使用。
+
+一句话总结：few-shot 的本质是把"怎么选工具"示范给模型看。
+
+---
+
+### Q: 实现一个通用的工具注册和调用机制。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+通用工具机制至少要有三块：注册表、schema、执行器。注册表保存工具名、描述、参数定义和权限要求；schema 用来校验输入；执行器负责超时、重试、审计和结果封装。  
+这样设计的好处是新增工具时只需要注册，不必改动主流程。同时，工具调用可以统一做观测和安全控制。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+registry.register(
+    name="get_weather",
+    schema=WeatherArgs,
+    handler=get_weather,
+    permission="read_weather"
+)
+result = executor.call("get_weather", {"city": "Shanghai"})
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- 工具机制核心是注册表、参数 schema 和统一执行器。
+- 新工具应通过配置接入，而不是在主逻辑里硬编码。
+- 统一执行器可以集中处理权限、超时和审计。
+
+一句话总结：好的工具机制让能力扩展像注册插件，而不是改主程序。
+
+---
+
+### Q: 编写一个带有错误重试和降级策略的工具调用包装器。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+工具包装器通常要处理四类情况：瞬时失败、永久失败、超时和返回异常。对瞬时失败可做指数退避重试；对永久失败应立即停止；超时要可取消；返回异常要结构化上报。降级策略则取决于业务，比如换备用接口、返回缓存结果或转人工。  
+重点不是"永远重试直到成功"，而是根据错误类型有节制地恢复。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+for attempt in range(3):
+    try:
+        return primary_tool(**args)
+    except TimeoutError:
+        sleep(backoff(attempt))
+if fallback_tool:
+    return fallback_tool(**args)
+return {"status": "degraded", "reason": "tool_unavailable"}
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- 重试要按错误类型区分，不能盲目无限重试。
+- 降级可以是备用接口、缓存结果或人工接管。
+- 包装器要统一返回结构化错误，便于 Agent 决策下一步。
+
+一句话总结：健壮的工具包装器不是保证不报错，而是保证出错时系统仍然可控。
+
+---
+
+### Q: 实现一个 Agent 的流式输出（Streaming），同时支持中间步骤展示。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+流式输出通常分两类事件：最终内容流和中间过程流。最终内容流给用户连续反馈，中间过程流用于展示当前正在检索、调用工具还是等待审批。实现时可以用事件流模型，把不同阶段统一包装成事件并逐步推给前端。  
+关键是不要把思维链原样暴露，而是展示适合用户看的摘要化步骤，例如"正在查询订单系统"、"正在生成报告"。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+yield {"type": "status", "message": "正在检索知识库"}
+yield {"type": "tool", "name": "search_docs"}
+for token in llm.stream(prompt):
+    yield {"type": "token", "content": token}
+yield {"type": "done"}
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- Streaming 不只是 token 流，还包括状态事件流。
+- 中间步骤应摘要化展示，避免泄露不适合暴露的内部内容。
+- 事件模型能让前端同时处理状态和结果。
+
+一句话总结：好的流式输出让用户感觉 Agent 在工作，而不是在卡住。
+
+---
+
+### Q: 如何为 Agent 编写单元测试？Mock LLM 调用的最佳实践是什么？
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+Agent 单测的核心是把不稳定的外部依赖替换掉。LLM、向量库、外部 API、时间和随机数都应该 mock 或 stub，这样测试才能稳定复现。  
+最佳实践通常是：为路由、工具选择、错误恢复、输出解析等关键节点单独写测试；对 LLM 返回做固定夹具；对工具调用顺序和参数做断言；只在少量集成测试中接真实模型。不要把所有质量判断都塞进慢而脆弱的端到端测试。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+mock_llm.return_value = {"tool": "get_order_status", "args": {"order_id": "123"}}
+result = agent.run("查一下订单 123")
+assert result["tool_called"] == "get_order_status"
+assert tool_mock.called_once_with(order_id="123")
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- 单测要 mock 掉 LLM 和外部依赖，保证可重复。
+- 重点测路由、解析、工具调用、失败恢复等稳定逻辑。
+- 真实模型留给少量集成或回归测试，不适合当主力单测。
+
+一句话总结：Agent 单测的核心，不是测模型有多聪明，而是测系统在固定输出下是否按预期工作。
+
+---
+
+### Q: 实现一个简单的 Agent 评估框架，支持多维度打分。
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+简单 eval 框架一般包括测试集、执行器、评分器和报告器。测试集定义输入和期望；执行器批量跑 agent；评分器按多个维度打分，比如任务成功、格式正确、工具使用是否合理、延迟和成本；报告器汇总均分和失败原因。  
+设计重点是评分维度要可扩展，不能只留一个总分。多维分数才有助于定位问题。
+
+#### 2. 结合实际例子 / Practical Example
+
+```python
+scores = {
+    "task_success": judge_task(output, expected),
+    "format_ok": judge_format(output),
+    "tool_ok": judge_tool_trace(trace),
+    "latency_ms": trace["latency_ms"],
+}
+report.append(scores)
+```
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- Eval 框架最小四件套：样本、执行、评分、报告。
+- 打分要多维，不要只看一个总分。
+- 失败原因标签化，才能支撑版本迭代。
+
+一句话总结：一个能用的评估框架，不是只会打分，而是能告诉你为什么扣分。
