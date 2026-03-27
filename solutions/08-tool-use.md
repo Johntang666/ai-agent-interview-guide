@@ -735,3 +735,69 @@ MCP 可以理解为一种让模型或 Agent 与外部工具、资源和上下文
 - 模型负责生成代码，执行器负责安全边界。
 
 一句话总结：代码执行要把"会写代码"和"能碰系统"彻底分开。
+
+---
+
+### Q: MCP 服务支持哪些传输方式？`stdio`、`Streamable HTTP` 和旧版 SSE / HTTP+SSE 分别适合什么场景，性能和工程取舍如何？
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+按 MCP 官方规范，当前标准传输方式主要是两类：`stdio` 和 `Streamable HTTP`。其中旧版的独立 `SSE` / `HTTP+SSE` 仍然会在一些 SDK 或兼容实现里出现，但已经属于向后兼容路径，不再是新系统的首选。  
+`stdio` 适合本机进程拉起本机 MCP Server 的场景，例如 IDE、桌面客户端、CLI、代码 Agent。它的优点是链路最短、没有网络栈开销、延迟最低、实现简单；缺点是通常偏单客户端、本机绑定、水平扩展能力弱，不适合远程共享服务。  
+`Streamable HTTP` 适合远程 MCP Server、SaaS 工具接入、浏览器或多客户端共享能力场景。它通过 HTTP POST/GET 通信，并可选用 SSE 做流式通知，因此更适合认证、会话管理、多客户端并发、网关接入和云端部署。代价是它一定比本地 `stdio` 多一层网络与序列化开销，但换来了部署灵活性、标准鉴权和平台治理能力。  
+旧版 `SSE` / `HTTP+SSE` 的价值主要在历史兼容。它能完成基本的流式推送，但在可恢复性、统一端点、会话和新规范一致性上不如 `Streamable HTTP`。如果是新项目，面试里最稳妥的回答是：本地工具首选 `stdio`，远程服务首选 `Streamable HTTP`，旧版 SSE 只在兼容老客户端时保留。
+
+#### 2. 结合实际例子 / Practical Example
+
+- 本地代码助手连接 `git`、文件系统、终端执行器时，通常用 `stdio`，因为客户端直接拉起 Server，最快也最简单。
+- 企业内部统一把 Jira、Confluence、CRM、Data Warehouse 暴露成远程 MCP 服务时，通常选 `Streamable HTTP`，因为要支持认证、审计、反向代理和多个客户端共享。
+- 如果团队历史上已经有 HTTP+SSE 的老实现，可以先兼容保留，但新能力和新客户端应逐步迁到 `Streamable HTTP`。
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- 当前标准答案是 `stdio` 和 `Streamable HTTP`，旧版 SSE 主要用于兼容。
+- `stdio` 最适合本地低延迟集成，`Streamable HTTP` 最适合远程多客户端服务。
+- 传输选型本质上是在本地性能、远程治理和兼容成本之间做权衡。
+
+一句话总结：本地直连用 `stdio`，云端共享用 `Streamable HTTP`，旧版 SSE 不建议作为新项目主路径。
+
+#### References
+
+- [Model Context Protocol - Transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
+- [Model Context Protocol - Architecture Overview](https://modelcontextprotocol.io/docs/learn/architecture)
+- [WeThinkIn/AIGC-Interview-Book - AI Agent基础知识](https://github.com/WeThinkIn/AIGC-Interview-Book/blob/main/AI%20Agent%E5%9F%BA%E7%A1%80/AI%20Agent%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.md)
+
+---
+
+### Q: 介绍一下 AI Agent 系统中 Skills 的原理和作用。它和一次性的 Prompt、普通工具封装有什么区别？
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+Skills 可以理解为面向 Agent 的“可按需加载能力包”。它不只是几句提示词，而是把元数据、操作说明、脚本、模板、参考资料等组织成一个可复用的目录，让 Agent 在任务匹配时动态加载。  
+它和一次性 Prompt 的区别在于，Prompt 更像某次对话里的临时指令，而 Skill 是可复用、可发现、可维护的长期能力资产；它和普通工具封装的区别在于，工具更偏“执行一个动作”，而 Skill 更偏“教 Agent 如何在某个领域稳定完成一类任务”，可以同时包含说明、流程、脚本和引用资料。  
+官方文档强调了 Skills 的渐进式加载机制：元数据常驻，用于告诉 Agent 这个 Skill 何时适用；主说明在命中时加载；更重的资源文件和脚本只在需要时读取或执行。这样做的好处是既能保持上下文轻量，又能把复杂领域知识沉淀成结构化资产。对工程团队来说，Skills 的价值主要体现在四点：能力复用、降低重复 Prompt 成本、把经验固化为可维护工件、以及通过脚本提升执行可靠性。  
+当然，Skill 也不是越多越好。描述写得不清、作用边界重叠、引用资源过时，都会让 Agent 误触发或触发后走偏。所以 Skill 设计的关键不只是“有没有”，而是触发条件、目录结构、资源组织和边界定义是否清晰。
+
+#### 2. 结合实际例子 / Practical Example
+
+比如一个“发票处理 Skill”可以包含：
+
+- `SKILL.md`：告诉 Agent 什么时候应该使用这个 Skill，整体处理流程是什么。
+- `scripts/validate_invoice.py`：校验发票字段和税率是否合法。
+- `references/policy.md`：报销制度、票据规则、异常处理说明。
+
+当用户说“帮我核验这批发票并生成报销摘要”时，Agent 先根据元数据识别该 Skill，再读取处理说明，必要时执行脚本和参考文件。  
+如果只靠一次性 Prompt，很多规则会在会话里反复重写；如果只靠工具调用，Agent 又可能知道怎么“执行脚本”，却不知道整套发票处理流程和异常规则。
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- Skill 是可按需加载的能力包，不只是临时 Prompt，也不只是单个工具。
+- 它把说明、脚本和参考资料组织成可复用资产，适合沉淀领域流程。
+- Skill 设计重点在触发边界、目录结构和渐进式加载，而不在堆更多文档。
+
+一句话总结：Prompt 是一次性提醒，Tool 是单点动作，Skill 是可复用的领域工作手册。
+
+#### References
+
+- [Anthropic - Agent Skills](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
+- [WeThinkIn/AIGC-Interview-Book - AI Agent基础知识](https://github.com/WeThinkIn/AIGC-Interview-Book/blob/main/AI%20Agent%E5%9F%BA%E7%A1%80/AI%20Agent%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.md)

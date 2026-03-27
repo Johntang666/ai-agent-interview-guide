@@ -1,6 +1,6 @@
 # 学习资源 / Learning Resources
 
-> 最后更新：2026-03-25 | 数据来源：GitHub、知乎、CSDN、DataCamp、Analytics Vidhya、AEM Institute、MachineLearningMastery 等
+> 最后更新：2026-03-27 | 数据来源：GitHub、知乎、CSDN、DataCamp、Analytics Vidhya、AEM Institute、MachineLearningMastery 等
 
 ---
 
@@ -20,6 +20,22 @@
 | **EmbraceAGI/AIGC_Interview** | AIGC 面试题集合 | [GitHub](https://github.com/EmbraceAGI/AIGC_Interview) |
 | **alirezadir/Machine-Learning-Interviews** | ML/AI 技术面试指南，2025 年新增 Agentic AI Systems 模块 | [GitHub](https://github.com/alirezadir/Machine-Learning-Interviews) |
 | **TidorP/MLJobSearch2025** | ML 公司分级列表与面试题 | [GitHub](https://github.com/TidorP/MLJobSearch2025) |
+
+### 重点参考：WeThinkIn/AIGC-Interview-Book
+
+仓库地址：[WeThinkIn/AIGC-Interview-Book](https://github.com/WeThinkIn/AIGC-Interview-Book)
+
+`WeThinkIn/AIGC-Interview-Book` 更像一份中文 AIGC 面试与求职综合仓库，而不是只做 Agent 的单点题库。对本仓库最有参考价值的部分主要有三类：
+
+- `AI Agent基础`：适合补充 Agent 基础概念、Function Calling、MCP、Memory、Workflow、Skills 等题目来源。
+- `开放性问题`：适合补充产品落地、业务价值、行业趋势、岗位成长这类开放题，尤其适合 `10-real-world-cases`。
+- `算法岗面试求职宝典`：适合扩展面试视角，但需要二次筛选，避免把泛 AI 求职内容直接混入 Agent 专题题库。
+
+将这个仓库内容迁移到本项目时，建议遵循三条原则：
+
+- 先去重再落库：它的 Agent 章节和本仓库已有题目有不少交叉，优先抽取 `Memory vs RAG`、`Agent vs Workflow`、`Skills`、`MCP 传输方式` 这类当前题库相对薄弱的问题。
+- 先归类再补答案：参考仓库更像“广覆盖素材库”，本仓库则强调按章节组织和可口述的面试回答，需要二次重写。
+- 把它当作“中文开放题补充源”：尤其适合补充那些没有唯一标准答案、但能区分候选人工程判断力和产品理解力的问题。
 
 ### 在线面试专题
 
