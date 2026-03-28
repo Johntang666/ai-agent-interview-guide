@@ -308,6 +308,214 @@
 - `07-memory-and-rag`
 - `09-evaluation-and-safety`
 
+---
+
+### 11. LLM实习小厂算法面经
+
+- 来源：牛客网
+- 日期：2026-02-04
+- 链接：https://www.nowcoder.com/feed/main/detail/49f8398dfb0d4fc49ce8f8e89c1d12bc
+
+#### 高频问题
+
+- 数据如何获取、筛选、清洗，数据格式和输入输出如何设计，MCP 在项目里怎么用。
+- 为什么选择 Qwen3，哪些 SFT 是必要的，哪些不值得做。
+- 多 Agent 如何协作，LangGraph 的关键特性和落地方式是什么。
+- 模型效果怎么评测，数据集和评价指标怎么设计。
+- 为什么 `temperature=0` 理论上更稳定，但工程上仍可能无法完全复现相同输出。
+- 如果想截断某个 Agent 或模型输出，只保留最相关部分，代码层怎么实现。
+
+#### 面试启发
+
+- 面试官已经不满足于“用了什么模型”，会继续追问数据、评测、可复现性和输出后处理。
+- Agent 项目的细节会落到非常工程化的点，例如输出裁剪、LangGraph 状态流和模型选型 trade-off。
+- “能不能讲清数据和评测”正在成为很多 Agent / LLM 岗的分水岭。
+
+#### 推荐回看章节
+
+- `02-frameworks`
+- `05-coding`
+- `06-multi-agent`
+- `08-tool-use`
+- `09-evaluation-and-safety`
+
+---
+
+### 12. 聊聊Agent实习
+
+- 来源：牛客网
+- 日期：2026-02-10
+- 链接：https://www.nowcoder.com/feed/main/detail/da2993b11f7b478bb4105e2b980fbeb3
+
+#### 高频问题
+
+- Agent 在学术和工程上分别如何拆分，和普通 LLM 应用有什么区别。
+- 上下文工程（Context Engineering）和 Prompt 工程有什么区别。
+- Agent 在工业场景里如何减少幻觉（Hallucination）。
+- 多 Agent / 多异步任务下，如何防止上下文污染。
+- RAG 流程、MCP vs Tool / Function Calling。
+- Redis 单线程、HTTPS 握手、课程表 / 拓扑排序、SFT / PPO / DPO / GRPO、微调流程。
+
+#### 面试启发
+
+- 最近真实面试明显从“会不会调 API”切到“能不能把 Agent 跑进真实工程系统”。
+- 上下文管理、幻觉治理、MCP 边界和工程基础，已经是经常连着追问的组合题。
+- Agent 岗并没有抛弃后端和算法基础，反而更强调“AI + 工程”的双栈能力。
+
+#### 推荐回看章节
+
+- `01-fundamentals`
+- `04-system-design`
+- `06-multi-agent`
+- `07-memory-and-rag`
+- `08-tool-use`
+- `09-evaluation-and-safety`
+
+---
+
+### 13. Agent开发 字节面试被问麻了
+
+- 来源：牛客网
+- 日期：2026-02-09
+- 链接：https://www.nowcoder.com/feed/main/detail/54c93709e7224f7f91932e1cae818fe7
+
+#### 高频问题
+
+- 一面先打后端基础：微服务、数据库、Redis、MQ、计网、操作系统。
+- 二面集中问 Agent：MCP、智能体框架、LangGraph、多智能体协作范式、SSE、ReAct、Function Calling、CoT、few-shot、幻觉、记忆管理、RAG 流程与优化、Workflow。
+- 三面继续追模型与落地：大模型部署、微调、强化学习、垂直领域落地和常用架构。
+
+#### 面试启发
+
+- 现在不少 Agent 岗已经是“后端工程 + Agent 框架 + 模型部署”的组合考察。
+- 单纯会讲 Workflow 和 Prompt 远远不够，面试官默认你能把系统部署起来并跑稳。
+- 字节这类岗位对框架、协议、推理范式和落地架构是一起拷打的。
+
+#### 推荐回看章节
+
+- `02-frameworks`
+- `03-design-patterns`
+- `04-system-design`
+- `08-tool-use`
+- `10-real-world-cases`
+
+---
+
+### 14. 快手AI agent开发实习生一二面
+
+- 来源：牛客网
+- 日期：2026-02-09
+- 链接：https://www.nowcoder.com/feed/main/detail/511a8021f28c46a0ad27c75a6e51b1a1?sourceSSR=post
+
+#### 高频问题
+
+- 为什么引入父子索引、BM25、rerank，比例和流程怎么设计。
+- rerank 后返回几个块，top-k 截断为什么取这个值，有没有验证。
+- 上下文工程怎么做，记忆模块怎么设计，长短记忆如何协同。
+- RAG 怎么评测，有哪些维度和指标，如何提升相关度和回答效果。
+- 如果有一千条数据需要处理或求和，Agent / Workflow 怎么设计。
+- 如何提升 Agent 的“智能程度”，而不仅仅是把流程串起来。
+
+#### 面试启发
+
+- 快手这类内部 Agent 平台岗位，非常看重 RAG 评测、上下文工程和检索参数调优。
+- 真实面试会问到 `rerank top-k`、切块返回数、上下文截断这类非常细的线上参数。
+- “你有什么体系化优化思路”比“你做过哪些点优化”更能区分候选人水平。
+
+#### 推荐回看章节
+
+- `04-system-design`
+- `05-coding`
+- `07-memory-and-rag`
+- `09-evaluation-and-safety`
+
+---
+
+### 15. 阿里云AI Agent开发（一面
+
+- 来源：牛客网
+- 日期：2026-03-05
+- 链接：https://www.nowcoder.com/feed/main/detail/a1a7c399c264425fa9ff0b051d9c4407
+
+#### 高频问题
+
+- 项目中的工作流是怎么搭建的。
+- 工作流怎么评测。
+- 工作流项目如何部署，是单体应用还是微服务，对 K8S 的了解如何。
+- 工作流搭建时有没有考虑可用性问题。
+- 对 RAG 的理解，以及项目里如何落地。
+
+#### 面试启发
+
+- 阿里云这类岗位对 Workflow 的关注已经从“会不会搭”升级到“怎么评测、怎么部署、怎么保可用性”。
+- Agent 项目正在越来越像标准工程系统，K8S、微服务、可用性和架构分层会被一并追问。
+- 只会讲 Agent 节点，不会讲部署和可用性，在这类岗位里明显不够。
+
+#### 推荐回看章节
+
+- `04-system-design`
+- `07-memory-and-rag`
+- `09-evaluation-and-safety`
+- `10-real-world-cases`
+
+---
+
+### 16. 网易Ai Agent应用开发一面
+
+- 来源：牛客网
+- 日期：2026-03-07
+- 链接：https://www.nowcoder.com/feed/main/detail/7ce20651d7e641bc9208647094b95f72?sourceSSR=dynamic&weFlow=true
+
+#### 高频问题
+
+- Coze 的不同编排方式怎么理解，你是如何设计节点的。
+- 你写了哪些 MCP 工具，工具边界如何划分。
+- 上下文管理和记忆模块怎么做。
+- ReAct 相关模式之间有什么差别。
+- 设计一个全自动化的 AI 漫剧创作 Agent，你会怎么做。
+- 这个系统最大的三个问题是什么，如何解决；如果先发一版，保留哪些核心节点。
+
+#### 面试启发
+
+- 游戏 / 内容类 Agent 岗很喜欢把“架构设计题”落到具体内容生产场景，而不是只问通用客服或办公助手。
+- 面试官会持续追问“先发 MVP 留什么节点”，这说明产品取舍和工程裁剪能力非常关键。
+- 如果你说要做自反馈、自迭代、人物一致性，就要准备好继续解释技术实现和评测方法。
+
+#### 推荐回看章节
+
+- `02-frameworks`
+- `03-design-patterns`
+- `04-system-design`
+- `08-tool-use`
+- `10-real-world-cases`
+
+---
+
+### 17. 聊一聊最近碰到的一些 Agent 面试题（五）
+
+- 来源：牛客网
+- 日期：2026-03-20
+- 链接：https://www.nowcoder.com/discuss/864449317648490496?sourceSSR=dynamic
+
+#### 高频问题
+
+- 如何开发一个高质量的 Agent Skill，`SKILL.md` 应该包含什么、不应该包含什么。
+- 开发一个 MCP Server 时，工具粒度、参数设计、返回值设计和错误信息设计怎么取舍。
+- Rules 文件（如 `.cursorrules`、`CLAUDE.md`、`AGENTS.md`）怎么配置才真正有效。
+- Agent 输出不符合预期时怎么调试，和传统代码调试有什么区别。
+
+#### 面试启发
+
+- 2026 年的 Agent 面试已经把 `Skill`、`Rules 文件`、`Trace 调试` 这些过去偏实践细节的话题抬到了面试台面上。
+- “如何写给 Agent 看”的文档和“如何做可调试性”正在成为 AI Coding / Agent 工程岗位的新常识。
+- MCP 已经不只是“知道协议是什么”就够了，开始追问工具粒度、参数设计和错误语义。
+
+#### 推荐回看章节
+
+- `05-coding`
+- `08-tool-use`
+- `09-evaluation-and-safety`
+
 ## 使用建议
 
 1. 先通读面经里的提问方式，观察面试官是如何从“做过项目”追问到“是否真正上线过”的。

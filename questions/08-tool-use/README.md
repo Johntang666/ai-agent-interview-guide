@@ -63,3 +63,5 @@
 19. **MCP 服务支持哪些传输方式？`stdio`、`Streamable HTTP` 和旧版 SSE / HTTP+SSE 分别适合什么场景，性能和工程取舍如何？**
 
 20. **介绍一下 AI Agent 系统中 Skills 的原理和作用。它和一次性的 Prompt、普通工具封装有什么区别？**
+
+21. **MCP 和 Agent Skills 有什么区别？它们分别解决什么问题，应该如何组合使用？**

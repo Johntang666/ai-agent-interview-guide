@@ -801,3 +801,38 @@ Skills 可以理解为面向 Agent 的“可按需加载能力包”。它不只
 
 - [Anthropic - Agent Skills](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
 - [WeThinkIn/AIGC-Interview-Book - AI Agent基础知识](https://github.com/WeThinkIn/AIGC-Interview-Book/blob/main/AI%20Agent%E5%9F%BA%E7%A1%80/AI%20Agent%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.md)
+
+---
+
+### Q: MCP 和 Agent Skills 有什么区别？它们分别解决什么问题，应该如何组合使用？
+
+#### 1. 网络整合回答 / Comprehensive Answer
+
+MCP（Model Context Protocol）和 Agent Skills 经常一起出现，但它们不在同一层。  
+MCP 解决的是“Agent 怎么标准化连接工具、资源和外部系统”，重点是协议、发现、调用、返回；Skill 解决的是“Agent 在某类任务里应该怎么做”，重点是触发条件、操作步骤、边界约束和可复用流程。前者更像接口层，后者更像工作手册层。  
+如果用一句话区分：MCP 决定 Agent 能接什么，Skill 决定 Agent 怎么用这些能力。MCP 让数据库、文件系统、SaaS、内部服务以统一协议暴露出来；Skill 则把“处理发票”“修 CI”“生成论文配图”这类领域流程沉淀成可按需加载的能力包。  
+它们并不是替代关系，反而很适合组合。典型模式是：Skill 里定义任务步骤和触发边界，具体执行时再调用 MCP 暴露出来的工具或资源。这样既有统一接入能力，也有领域级流程约束。  
+面试里如果只说“Skill 就是 Prompt，MCP 就是 Tool Call”，通常还不够。更好的回答是强调：Skill 是行为层抽象，MCP 是连接层抽象，两者解决的问题不同。
+
+#### 2. 结合实际例子 / Practical Example
+
+一个“报销审核”Agent 可以这样组合：
+
+- 通过 MCP 连接 OCR 服务、财务系统、报销制度库和邮件系统。
+- 通过 `expense-review` Skill 告诉 Agent：先抽取票据信息，再校验规则，再检查预算，再生成审核结论，遇到高风险项必须转人工。
+
+如果只有 MCP，Agent 只是“能调这些工具”；如果只有 Skill，没有稳定工具接入，Agent 又很难真正落地执行。两者结合才完整。
+
+#### 3. 面试核心回答 / Core Interview Answer
+
+- MCP 是连接层，解决工具和资源的标准化接入。
+- Skill 是行为层，解决某类任务的可复用执行流程。
+- 最佳实践通常是 Skill 负责流程，MCP 负责把流程需要的能力接进来。
+
+一句话总结：MCP 给 Agent 装上插座，Skill 教 Agent 什么时候、按什么顺序去用这些插座。
+
+#### References
+
+- [Model Context Protocol - Overview](https://modelcontextprotocol.io/docs/learn/architecture)
+- [Anthropic - Agent Skills](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
+- [牛客网 - 掌握什么AI技能，会为你的求职大大加分](https://www.nowcoder.com/creation/subject/13f73873e9f94fdea3445a55b6e8b807?entranceType_var=%E4%BE%A7%E8%BE%B9%E6%A0%8F)

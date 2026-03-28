@@ -56,3 +56,9 @@
 15. **如何设计一个对 LLM 幻觉参数名或参数值具有鲁棒性的工具调用函数？**
 
 16. **用 Python 实现一个带有语义缓存（Semantic Cache）的工具调用层，相似请求复用缓存结果以降低 LLM 调用成本。**
+
+17. **上下文工程（Context Engineering）和 Prompt 工程有什么区别？在 Agent 系统里为什么前者越来越重要？**
+
+18. **Rules 文件（如 `.cursorrules`、`CLAUDE.md`、`AGENTS.md`）的配置策略有什么讲究？如何让 AI Coding / Agent 系统真正遵守项目规范？**
+
+19. **Agent 输出不符合预期时怎么调试？和调试传统代码有什么区别？**

@@ -1,6 +1,6 @@
 # 学习资源 / Learning Resources
 
-> 最后更新：2026-03-27 | 数据来源：GitHub、知乎、CSDN、DataCamp、Analytics Vidhya、AEM Institute、MachineLearningMastery 等
+> 最后更新：2026-03-28 | 数据来源：GitHub、知乎、CSDN、DataCamp、Analytics Vidhya、AEM Institute、MachineLearningMastery、牛客网 等
 
 ---
 
@@ -49,6 +49,8 @@
 | TechEon - System Design Guide | 2026 完整 Agentic AI 系统设计面试指南 | [Medium](https://atul4u.medium.com/the-complete-agentic-ai-system-design-interview-guide-2026-f95d0cfeb7cf) |
 | 大模型面试 100 问：RAG 与 Agent 篇 | RAG 与 Agent 核心面试题 8 道 | [网站](https://www.80aj.com/2026/01/04/llm-interview-rag-agent/) |
 | 火山引擎 - Agent 面试精选 | AI 大模型 Agent 面试精选 15 题 | [火山引擎](https://developer.volcengine.com/articles/7582491215644327942) |
+| 牛客网 - 聊聊Agent实习 | 2026-02 最新 Agent 实习高频题，按上下文工程 / 幻觉 / MCP / 工程基础拆分 | [牛客](https://www.nowcoder.com/feed/main/detail/da2993b11f7b478bb4105e2b980fbeb3) |
+| 牛客网 - Agent 面试题（五） | 2026-03 最新专题，聚焦 Skill、MCP Server、Rules 文件与 Agent 调试 | [牛客](https://www.nowcoder.com/discuss/864449317648490496?sourceSSR=dynamic) |
 
 ---
 

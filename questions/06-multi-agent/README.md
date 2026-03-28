@@ -57,3 +57,5 @@
 17. **从单体 Agent 到 Agent Swarm（蜂群架构）的演进路径是什么？如何设计任务自动拆解和 Agent 动态分配的系统？**
 
 18. **AI Agent 中 Agents、Teams、Workflows 三者有哪些区别？在什么场景下应该选择单 Agent、Agent Team 或固定 Workflow？**
+
+19. **多 Agent / 多异步任务场景下，如何防止上下文污染（Context Pollution）？**
